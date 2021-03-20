@@ -1,0 +1,29 @@
+body {
+    background-color: #0d0f19;
+    font-family: Inter, sans-serif;
+    color: #fff;
+}
+#mainPopup {
+    padding: 10px;
+    height: 150px;
+    width: 300px;
+}
+h1 {
+    font-size: 2em;
+    margin-top: 0;
+}
+p {
+    margin: 3px 0;
+}
+.row {
+    display: flex;
+} 
+.col-left {
+    flex: 40%;
+}
+.col-right {
+    flex: 60%;
+}
+.col-right img {
+    float: right;
+}
