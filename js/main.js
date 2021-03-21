@@ -6,8 +6,8 @@ window.onload = function () {
     function setPopup(data) {
         var price = '$ ' + data['bet-protocol']['usd'].toString();
         var mcap  = '$ ' + abbreviateNumber(Math.floor(data['bet-protocol']['usd_market_cap']));
-        var vol  = '$ ' + abbreviateNumber(Math.floor(data['bet-protocol']['usd_24h_vol']));
-        var change = printableNumber(data['bet-protocol']['usd_24h_change'].toFixed(2).toString()) + ' %';
+        var vol   = '$ ' + abbreviateNumber(Math.floor(data['bet-protocol']['usd_24h_vol']));
+        var change  = printableNumber(data['bet-protocol']['usd_24h_change'].toFixed(2).toString()) + ' %';
         var updated = getDateString(data['bet-protocol']['last_updated_at']);
         
         document.querySelector('#price').innerHTML = price;

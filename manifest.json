@@ -1,8 +1,8 @@
 {
   "name": "bepro token price",
-  "version": "1.0",
+  "version": "1.1",
   "manifest_version": 2,
-  "description": "chrome extension uses the coingecko API  to see the price, market cap, 24 hour volume and change of bepro token",
+  "description": "Displays bepro token information when you click the icon",
   "homepage_url": "https://github.com/felixfreyer/bepro-chrome-extension",
   "icons": {
     "16": "icons/icon16.png",
