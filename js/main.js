@@ -8,8 +8,8 @@ window.onload = function () {
         var mcap  = '$ ' + abbreviateNumber(Math.floor(data['bet-protocol']['usd_market_cap']));
         var vol   = '$ ' + abbreviateNumber(Math.floor(data['bet-protocol']['usd_24h_vol']));
         var change  = printableNumber(data['bet-protocol']['usd_24h_change'].toFixed(2).toString()) + ' %';
-        var updated = getDateString(data['bet-protocol']['last_updated_at']);
-        
+        var updated = getTimeDiff(data['bet-protocol']['last_updated_at']*1000);
+
         document.querySelector('#price').innerHTML = price;
         document.querySelector('#mcap').innerHTML = mcap;
         document.querySelector('#volume').innerHTML = vol;
@@ -21,12 +21,32 @@ window.onload = function () {
         return (n > 0) ? "+" + n : n;
     };
 
-    function getDateString(timestamp) {
-        timestampStr = timestamp.toString();
-        var newDate = new Date();
-        newDate.setTime(timestampStr*1000);
-        dateString = newDate.toUTCString();
-        return dateString;
+    function getTimeDiff(datetime)
+    {
+        var now = new Date().getTime();
+        if( isNaN(datetime) ) {
+            return "";
+        }
+        if (datetime < now) {
+            var milisec_diff = now - datetime;
+        } else {
+            var milisec_diff = datetime - now;
+        }
+        var days = Math.floor(milisec_diff / 1000 / 60 / (60 * 24));
+        var date_diff = new Date( milisec_diff );
+        if (days == 0) {
+            if (date_diff.getUTCHours() == 0) {
+                if (date_diff.getMinutes() == 0) {
+                    return date_diff.getSeconds() + " Seconds ago";
+                } else {
+                    return date_diff.getMinutes() + " Minutes " + date_diff.getSeconds() + " Seconds ago";
+                }
+            } else {
+                return date_diff.getHours() + " Hours " + date_diff.getMinutes() + " Minutes " + date_diff.getSeconds() + " Seconds ago";
+            }
+        } else {
+            return days + " Days "+ date_diff.getHours() + " Hours " + date_diff.getMinutes() + " Minutes " + date_diff.getSeconds() + " Seconds";
+        }
     }
 
     function abbreviateNumber(value) {
