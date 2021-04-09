@@ -4,7 +4,7 @@
 <head>
 	<link rel="stylesheet" type="text/css" href="/css/main.css">
 </head>
-<body>
+<body class="no-scroll">
 	<div id="mainPopup">
 		<div class="row">
 			<div class="col-left"><h1>bepro</h1></div>
@@ -29,6 +29,22 @@
 		<div class="row">
 			<div class="col-left"><p>Updated: </p></div>
 			<div class="col-right"><p id="updated"></p></div>
+		</div>
+	</div>
+	<div id="otherBags">
+		<div class="row">
+			<div class="col-left"><h1>other bags</h1></div>
+		</div>
+		<div id="coinList"></div>
+		<div class="row">
+			<div class="col-left">
+				<form autocomplete="off" action=""></form>
+					<div class="autocomplete">
+						<input id="myInput" type="text" name="myCoin" placeholder="serach">
+						<input id="myInputBtn"type="submit" value="+">
+					</div>
+				</form>
+			</div>
 		</div>
 		<div class="row last">
 			<div class="col-left"><a href="https://www.coingecko.com" target="_blank">Powered by CoinGecko</a></div>

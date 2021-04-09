@@ -2,11 +2,26 @@ body {
     background-color: #0d0f19;
     font-family: Inter, sans-serif;
     color: #fff;
+    overflow-y: hidden;
 }
-#mainPopup {
+.no-scroll {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .no-scroll::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+#mainPopup,
+#otherBags {
     padding: 10px;
-    height: 150px;
+    height: auto;
     width: 300px;
+}
+#coinList .bag:last-child {
+    margin-bottom: 0.63em;
+}
+#coinList .row:hover {
+    background-color: #313131;
 }
 h1 {
     font-size: 2em;
@@ -14,6 +29,7 @@ h1 {
 }
 p {
     margin: 3px 0;
+    font-size: 14px;
 }
 a {
     color: white;
@@ -25,7 +41,7 @@ a {
     display: flex;
 } 
 .row.last {
-    padding: 10px 0;
+    padding-top: 15px;
 }
 .col-left {
     flex: 40%;
@@ -33,6 +49,71 @@ a {
 .col-right {
     flex: 60%;
 }
+.col-price {
+    flex: 46%;
+}
+.col-remove {
+    flex: 14%;
+    text-align: center;
+    background-color: #0d0f19;
+    cursor: pointer;
+}
+.col-remove p {
+    font-size: 30px;
+    font-weight: 900;
+    line-height: 13px;
+    color: #0d0f19;
+}
 .col-right img {
     float: right;
+}
+.autocomplete {
+    position: relative;
+    display: flex;
+}
+input {
+    border: 1px solid transparent;
+    background-color: #313131;
+    padding: 10px;
+    font-size: 14px;
+}
+input:focus {
+    outline: none;
+}
+input[type=text] {
+    background-color: #313131;
+    color: white;
+    width: 80%;
+}
+input[type=submit] {
+    background-color: rgb(66,80,226);
+    color: #0d0f19;
+    cursor: pointer;
+    font-weight: 900;
+    font-size: 33px;
+    line-height: 18px;
+}
+.autocomplete-items {
+    position: absolute;
+    border-bottom: none;
+    border-top: none;
+    z-index: 99;
+    top: 100%;
+    left: 0;
+    right: 0;
+}
+.autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    color: white;
+    background-color: #313131; 
+    border-bottom: 1px solid #313131; 
+}
+.autocomplete-items div:hover {
+    background-color: rgb(66,80,226);
+    font-weight: 700;
+}
+.autocomplete-active {
+    background-color: rgb(60,63,221) !important; 
+    color: #ffffff; 
 }

@@ -4,6 +4,9 @@
   "manifest_version": 2,
   "description": "__MSG_appDesc__",
   "homepage_url": "https://github.com/felixfreyer/bepro-chrome-extension",
+  "permissions": [
+    "storage"
+  ],
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
