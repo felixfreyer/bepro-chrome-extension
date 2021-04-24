@@ -9,17 +9,30 @@ button.addEventListener('click', function() {
     addBag();
 });
 
-function addBag() {
-    let bagStr = document.getElementById("myInput").value;
-    var coinSymbol = bagStr.substring(bagStr.indexOf("[")+1, bagStr.length-1);
-    getCoinID(coinSymbol);
+function isCoinInList(coinSymbol) {
+    var addedCoinElements = document.querySelectorAll(".row.bag .col-left p");
+    var isInList = false;
+    Object.keys(addedCoinElements).every(key => {
+        if (addedCoinElements[key].innerHTML === coinSymbol) {
+            isInList = true;
+        }
+    });
+    return isInList;
 }
 
-function addBagFromStorage(id, coinSymbol, key) {
-    if (id.length > 0) {
-        fetch('https://api.coingecko.com/api/v3/simple/price?ids=' + id + '&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true')
-            .then(response => response.json())
-            .then(data => addBagElement(data, id, coinSymbol, false, key));
+function addBag() {
+    var input = document.getElementById("myInput");
+    let bagStr = input.value;
+    var coinSymbol = bagStr.substring(bagStr.indexOf("[")+1, bagStr.length-1);
+    // check if coin is already added
+    if (!isCoinInList(coinSymbol)) {
+        addPlaceholderElement(coinSymbol);
+        getCoinID(coinSymbol);
+        // clear input
+        input.value = "";
+    } else {
+        input.value = "Coin already in list";
+        setTimeout(() => {input.value = "";}, 1000);
     }
 }
 
@@ -29,7 +42,7 @@ function getCoinID(coinSymbol) {
         .then(data => getCoinIDfromList(data, coinSymbol));
 }
 
-function getCoinIDfromList(data, coinSymbol) {
+async function getCoinIDfromList(data, coinSymbol) {
     var id = "";
     coinSymbol = coinSymbol.toLowerCase();
     data.forEach(element => {
@@ -38,30 +51,68 @@ function getCoinIDfromList(data, coinSymbol) {
         }
     });
     if (id.length > 0) {
-        fetch('https://api.coingecko.com/api/v3/simple/price?ids=' + id + '&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true')
-            .then(response => response.json())
-            .then(data => addBagElement(data, id, coinSymbol, true, ""));
+        var url = 'https://api.coingecko.com/api/v3/simple/price?ids=' + id + 
+                  '&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true';
+        const response = await fetch(url);
+        var res = await response.json();
+        var price = '$ ' + res[id]['usd'].toString();
+        var change  = printableNumber(res[id]['usd_24h_change'].toFixed(2).toString()) + ' %';
+        addBagElement(price, change, id, coinSymbol, true, "");
     }
 }
 
-function addBagElement(data, id, coinSymbol, storeIt, key) {
-    var price = '$ ' + data[id]['usd'].toString();
-    var htmlCode = '<div class="row bag">' + 
+function addPlaceholders(coinList) {
+    Object.keys(coinList).forEach(key => {
+        var coinSymbol = coinList[key]["symbol"];
+        addPlaceholderElement(coinSymbol);
+    });
+}
+
+function addPlaceholderElement(coinSymbol) {
+    var htmlCode = '<div class="row bag placeholder draggable">' + 
                         '<div class="col-left"><p>' + coinSymbol.toUpperCase() + '</p></div>' + 
-                        '<div class="col-price"><p>' + price + '</p></div>' +
+                        '<div class="col-price"><p>loading...</p></div>' +
+                        '<div class="col-change"><p></p></div>' +
                         '<div class="col-remove"><p>-</p></div>' +
                     '</div>';
     var coinListElement = document.querySelector("#coinList");
     var bagElement = htmlToElement(htmlCode);
     coinListElement.appendChild(bagElement);
+}
+
+function removePlaceholderElement(coinSymbol) {
+    var placeholders = document.querySelectorAll(".row.bag.placeholder .col-left p");
+    if (placeholders.length > 0) {
+        Object.keys(placeholders).forEach(key => {
+            if (placeholders[key].innerHTML === coinSymbol.toUpperCase()) {
+                // remove parent row element
+                var row = placeholders[key].parentNode.parentNode;
+                row.parentNode.removeChild(row);
+            }
+        });
+    }
+}
+
+function addBagElement(price, change, id, coinSymbol, storeIt, key) {
+    var htmlCode = '<div class="row bag draggable">' + 
+                        '<div class="col-left"><p>' + coinSymbol.toUpperCase() + '</p></div>' + 
+                        '<div class="col-price"><p>' + price + '</p></div>' +
+                        '<div class="col-change"><p>' + change + '</p></div>' +
+                        '<div class="col-remove"><p>-</p></div>' +
+                    '</div>';
+    var coinListElement = document.querySelector("#coinList");
+    var bagElement = htmlToElement(htmlCode);
+    removePlaceholderElement(coinSymbol);
+    coinListElement.appendChild(bagElement);
+
+    if (change.substring(0, 1) === "+") {
+        bagElement.getElementsByClassName("col-change")[0].style.color = "#20FF3D";
+    } else {
+        bagElement.getElementsByClassName("col-change")[0].style.color = "#ff5454";
+    }
+
+
     let removeBtn = bagElement.querySelector(".col-remove");
-    // hover
-    bagElement.addEventListener("mouseover", event => {
-        removeBtn.setAttribute("style", "background-color: white;");
-    });
-    bagElement.addEventListener("mouseout", event => {
-        removeBtn.setAttribute("style", "background-color: #0d0f19;");
-    });
     // store bag
     if (storeIt) {
         chrome.storage.sync.get(null, function(items) {
@@ -70,19 +121,55 @@ function addBagElement(data, id, coinSymbol, storeIt, key) {
             var idAndSymbol = id + ":" + coinSymbol;
             chrome.storage.sync.set({[ "bag_" + size ]: idAndSymbol}, function() {
             });
-            // add remove function
             addRemoveFunc([ "bag_" + size ], removeBtn, bagElement);
         });
     } else {
-        // add remove function
-        addRemoveFunc(key, removeBtn, bagElement);
+        var bagIndex = parseInt(key) + 1;
+        var keyBag = "bag_" + bagIndex;
+        addRemoveFunc(keyBag, removeBtn, bagElement);
     }
+}
+
+function removeBagElements() {
+    document.querySelectorAll(".row.bag").forEach(e => e.parentNode.removeChild(e));
+}
+
+// resort keys, start with bag_1
+function resortLocalStorage() {
+    // load local storage
+    chrome.storage.sync.get(null, function(items) {
+        var newIndex = 1;
+        var updatedBags = [];
+        Object.keys(items).forEach(key => {
+            var newKey = "bag_" + newIndex;
+            var updatedBag = { "key": newKey, "value": items[key] };
+            updatedBags.push(updatedBag);
+            newIndex++;
+        });
+        // clear local storage
+        chrome.storage.sync.clear(function() {
+            // store updatedBags to local storage
+            Object.keys(updatedBags).forEach(key => {
+                var setKey = updatedBags[key]["key"];
+                var setValue = updatedBags[key]["value"];
+                var setBag = {[setKey]: setValue};
+                chrome.storage.sync.set(setBag, function() {
+                });
+            });
+            // remove bag elements
+            removeBagElements();
+            // reload bag elements from storage
+            getOtherBags();
+        });
+    });
+    
 }
 
 function addRemoveFunc(key, removeBtn, bagElement) {
     removeBtn.addEventListener('click', function() {
         bagElement.remove();
         chrome.storage.sync.remove(key, function() {
+            resortLocalStorage();
         });
     });
 }
@@ -123,17 +210,76 @@ function setPopup(data) {
     document.querySelector('#volume').innerHTML = vol;
     document.querySelector('#change').innerHTML = change;
     document.querySelector('#updated').innerHTML = updated;
+    if (change.substring(0, 1) === "+") {
+        document.getElementById('change').style.color = "#20FF3D";
+    } else {
+        document.getElementById('change').style.color = "#ff5454";
+    }
     getCoinList();
     getOtherBags();
+}
+async function fetchPrice(id) {
+    var url = 'https://api.coingecko.com/api/v3/simple/price?ids=' + id + 
+              '&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true';
+    const response = await fetch(url);
+    var res = await response.json();
+    var price = '$ ' + res[id]['usd'].toString();
+    var change = res[id]['usd_24h_change'].toFixed(2).toString();
+    return [price, change];
+}
+
+function sortCoinDataList(array, orderArray) {
+    var sortedArray = [];
+    Object.keys(orderArray).forEach(key_o => {
+        const result = array.find(coin => coin["id"] === orderArray[key_o]["id"]);
+        sortedArray.push(result);
+    });
+    return sortedArray;
+};
+
+async function fetchBags(coinList) {
+    var coinDataList = [];
+    await Promise.all(coinList.map(async (elem) => {
+        try {
+            var coinSymbol = elem["symbol"];
+            var id = elem["id"];
+            var values = await fetchPrice(id);
+            var price = values[0];
+            var change = values[1];
+            var coinData = { "id": id, "symbol": coinSymbol, "price": price, "change": change};
+            coinDataList.push(coinData);
+        } catch (error) {
+            console.log('error'+ error);
+        }
+    }));
+    // sort coinDataList by id in the same order as coinList
+    sortedArray = sortCoinDataList(coinDataList, coinList);
+    addBags(sortedArray)
+}
+function addBags(coinDataList) {
+    Object.keys(coinDataList).forEach(key => {
+        var id = coinDataList[key]["id"];
+        var coinSymbol = coinDataList[key]["symbol"];
+        var price = coinDataList[key]["price"];
+        var change  = printableNumber(coinDataList[key]["change"]) + ' %';
+        addBagElement(price, change, id, coinSymbol, false, key);
+    });
 }
 
 function getOtherBags() {
     chrome.storage.sync.get(null, function(items) {
+        var coinList = [];
+        // get coins from local storage
         Object.keys(items).forEach(key => {
             var id = items[key].substring(0,items[key].indexOf(":"));
             var coinSymbol = items[key].substring(items[key].indexOf(":")+1, items[key].length);
-            addBagFromStorage(id, coinSymbol, key);
+            var coin = { "id": id, "symbol": coinSymbol };
+            coinList.push(coin);
         });
+        // add placeholders while loading
+        addPlaceholders(coinList);
+        // fetch coins from coinList with coingecko api
+        fetchBags(coinList);
     });
 }
 
@@ -306,3 +452,4 @@ chrome.runtime.getPlatformInfo(function(info) {
     ]
   }
 })
+

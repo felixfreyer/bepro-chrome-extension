@@ -15,7 +15,7 @@ body {
 #otherBags {
     padding: 10px;
     height: auto;
-    width: 300px;
+    width: 350px;
 }
 #coinList .bag:last-child {
     margin-bottom: 0.63em;
@@ -43,17 +43,29 @@ a {
 .row.last {
     padding-top: 15px;
 }
+.row.bag {
+    margin-right: 7px;
+}
+.row.bag:hover .col-remove {
+    background-color: white;
+}
+#mainPopup .row {
+    margin-right: 7px;
+}
 .col-left {
-    flex: 40%;
+    flex: 31%;
 }
 .col-right {
-    flex: 60%;
+    flex: 69%;
 }
 .col-price {
-    flex: 46%;
+    flex: 31%;
+}
+.col-change {
+    flex: 26%;
 }
 .col-remove {
-    flex: 14%;
+    flex: 12%;
     text-align: center;
     background-color: #0d0f19;
     cursor: pointer;
