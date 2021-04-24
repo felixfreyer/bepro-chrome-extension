@@ -6,6 +6,6 @@ var intervalId = window.setInterval(function(){
 
 function setBadge(data) {
 	chrome.browserAction.setBadgeBackgroundColor({color: [0, 0, 0, 100]});
-	var price = data['bet-protocol']['usd'].toString();
+	var price = data['bet-protocol']['usd'].toString().substring(0, 5);
 	chrome.browserAction.setBadgeText({text: price});
 }
