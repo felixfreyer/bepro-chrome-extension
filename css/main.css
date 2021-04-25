@@ -129,3 +129,10 @@ input[type=submit] {
     background-color: rgb(60,63,221) !important; 
     color: #ffffff; 
 }
+canvas{
+    width: 138px !important;
+    height: 93px !important;
+    position: absolute;
+    top: 73px;
+    right: 12px;
+}

@@ -1,13 +1,72 @@
 window.onload = function () {
     fetch('https://api.coingecko.com/api/v3/simple/price?ids=bet-protocol&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true')
         .then(response => response.json())
-        .then(data => setPopup(data));
+        .then(data => setPopup(data))
+        .then(() => drawChart());
 }
 
 var button = document.querySelector("#myInputBtn");
 button.addEventListener('click', function() {
     addBag();
 });
+
+async function drawChart() {
+    var url = 'https://api.coingecko.com/api/v3/coins/bet-protocol/market_chart?vs_currency=usd&days=1';
+    const response = await fetch(url);
+    var res = await response.json();
+    var prices = res["prices"];
+    var priceDataList = [];
+    var labelDataList = [];
+    Object.keys(prices).forEach(key => {
+        var label = prices[key][0];
+        var price = prices[key][1];
+        labelDataList.push(label);
+        priceDataList.push(price);
+    });
+
+    var ctx = document.getElementById('beproChart');
+    const labels = labelDataList;
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: 'My First Dataset',
+            data: priceDataList,
+            fill: false,
+            borderColor: 'rgb(66,80,226)',
+            borderWidth: 3,
+            tension: 0.1,
+            pointStyle: 'line'
+        }]
+    };
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false,
+                labels: {
+                    color: 'rgb(0, 0, 0)'
+                }
+            },
+            tooltip: {
+                enabled: false
+            }
+        },
+        scales: {
+            x: {
+                display: false
+            },
+            y: {
+                display: false
+            }
+        }
+    };
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: options
+    });
+}
 
 function isCoinInList(coinSymbol) {
     var addedCoinElements = document.querySelectorAll(".row.bag .col-left p");
